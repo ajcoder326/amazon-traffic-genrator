@@ -289,9 +289,15 @@ class BrowserWebProxyService {
                             
                         } catch (error) {
                             result.error = error.message;
-                            console.error(`[B${browserIdx + 1}-T${tabIdx + 1}] ✗ Error: ${error.message.substring(0, 50)}`);
+                            console.error(`[B${browserIdx + 1}-T${tabIdx + 1}] ✗ Error: ${error.message.substring(0, 80)}`);
                         } finally {
-                            await page.close();
+                            try {
+                                if (!page.isClosed()) {
+                                    await page.close();
+                                }
+                            } catch (e) {
+                                // Page already closed, ignore
+                            }
                         }
                         
                         return result;
@@ -503,27 +509,54 @@ class BrowserWebProxyService {
     }
 
     async simulateHumanBehavior(page, minTime, maxTime) {
-        const visitDuration = (minTime + Math.random() * (maxTime - minTime)) * 1000;
-        const scrolls = Math.floor(Math.random() * 5) + 3;
+        try {
+            const visitDuration = (minTime + Math.random() * (maxTime - minTime)) * 1000;
+            const scrolls = Math.floor(Math.random() * 5) + 3;
 
-        for (let i = 0; i < scrolls; i++) {
-            const scrollAmount = Math.floor(Math.random() * 500) + 200;
-            await page.evaluate((amount) => window.scrollBy(0, amount), scrollAmount);
-            await page.waitForTimeout(Math.random() * 2000 + 1000);
-        }
+            // Check if page is still valid
+            if (page.isClosed()) return;
 
-        // Random mouse movements
-        for (let i = 0; i < 3; i++) {
-            const x = Math.floor(Math.random() * 1200) + 100;
-            const y = Math.floor(Math.random() * 600) + 100;
-            await page.mouse.move(x, y);
-            await page.waitForTimeout(Math.random() * 500 + 200);
-        }
+            for (let i = 0; i < scrolls; i++) {
+                try {
+                    const scrollAmount = Math.floor(Math.random() * 500) + 200;
+                    await page.evaluate((amount) => window.scrollBy(0, amount), scrollAmount);
+                    await page.waitForTimeout(Math.random() * 2000 + 1000);
+                } catch (e) {
+                    // Page context destroyed during scroll, continue
+                    if (e.message.includes('Execution context was destroyed')) {
+                        break;
+                    }
+                }
+            }
 
-        const elapsed = scrolls * 3000;
-        const remaining = Math.max(0, visitDuration - elapsed);
-        if (remaining > 0) {
-            await page.waitForTimeout(remaining);
+            // Random mouse movements
+            for (let i = 0; i < 3; i++) {
+                try {
+                    if (page.isClosed()) break;
+                    const x = Math.floor(Math.random() * 1200) + 100;
+                    const y = Math.floor(Math.random() * 600) + 100;
+                    await page.mouse.move(x, y);
+                    await page.waitForTimeout(Math.random() * 500 + 200);
+                } catch (e) {
+                    // Page context destroyed during mouse move, continue
+                    if (e.message.includes('Target page, context or browser has been closed')) {
+                        break;
+                    }
+                }
+            }
+
+            const elapsed = scrolls * 3000;
+            const remaining = Math.max(0, visitDuration - elapsed);
+            if (remaining > 0) {
+                try {
+                    await page.waitForTimeout(remaining);
+                } catch (e) {
+                    // Page closed, ignore
+                }
+            }
+        } catch (e) {
+            // Silently handle any page context errors
+            console.log(`[WebProxy] Behavior simulation ended: ${e.message.substring(0, 50)}`);
         }
     }
 
