@@ -1,0 +1,103 @@
+
+╔════════════════════════════════════════════════════════════════════╗
+║                                                                    ║
+║               🚀 TRAFFIC GENERATOR - QUICK REFERENCE                ║
+║                                                                    ║
+╚════════════════════════════════════════════════════════════════════╝
+
+📍 REPOSITORY
+   https://github.com/ajcoder326/amazon-traffic-genrator
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📤 FOR YOU (Repository Owner) - PUSHING UPDATES
+
+   Location: c:\Users\dj\Downloads\traffic-generator\deploy\
+   
+   Quick Push:
+   ──────────
+   1. Edit your files
+   2. Double-click: PUSH_UPDATE.bat
+   3. Enter message
+   4. Done!
+   
+   Manual Push:
+   ────────────
+   cd c:\Users\dj\Downloads\traffic-generator\deploy
+   git add .
+   git commit -m "Your update message"
+   git push
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📥 FOR TEAM (Target PC) - PULLING UPDATES
+
+   Location: C:\Users\[Name]\Downloads\amazon-traffic-genrator\
+   
+   Quick Pull:
+   ───────────
+   Double-click: PULL_UPDATE.bat
+   
+   Manual Pull:
+   ────────────
+   cd amazon-traffic-genrator
+   git pull
+   
+   If Dependencies Changed:
+   ─────────────────────────
+   .\SETUP_COMPLETE.bat
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 TYPICAL WORKFLOW
+
+   YOU (Owner):
+   ═══════════
+   Edit files → PUSH_UPDATE.bat → Notify team
+   
+   TEAM (Members):
+   ═══════════════
+   PULL_UPDATE.bat → Test → Use
+   
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📁 KEY FILES
+
+   ✅ PUSH_UPDATE.bat         → Push changes (Owner)
+   ✅ PULL_UPDATE.bat         → Pull updates (Team)
+   ✅ UPDATE_WORKFLOW.md      → Complete guide
+   ✅ TEAM_INSTRUCTIONS.md    → Team setup guide
+   ✅ START_HERE.bat          → Main menu
+   ✅ SETUP_COMPLETE.bat      → First-time setup
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚨 TROUBLESHOOTING
+
+   "Merge conflict" → git reset --hard origin/main; git pull
+   "Push rejected"  → git pull; git push
+   "Port in use"    → START_HERE.bat → Option [7]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✨ WEB PROXY TURBO MODE
+
+   ⚡ 3 Browsers × 5 Tabs = 15 Parallel Visits
+   🌐 5 Different Proxy Services
+   🎯 Different IP Per Tab
+   💰 FREE - No Proxy List Needed!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📞 NEED HELP?
+
+   1. Check UPDATE_WORKFLOW.md
+   2. Check TEAM_INSTRUCTIONS.md
+   3. Check terminal/console errors
+   4. Re-run SETUP_COMPLETE.bat
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Version: 2.0 | Status: ✅ Production Ready | Updated: Jan 2026
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
