@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Generator - Quick Setup Guide</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: #333;
+        }
+        .container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header p { font-size: 1.2em; opacity: 0.9; }
+        .content { padding: 40px; }
+        .step {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .step h3 { display: inline-block; color: #667eea; margin-bottom: 10px; }
+        .step ul { margin: 15px 0 0 50px; }
+        .step li { margin: 8px 0; }
+        .file-box {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .file-box:hover {
+            background: #1a202c;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .feature {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .feature h4 { font-size: 2em; margin-bottom: 5px; }
+        .feature p { opacity: 0.9; font-size: 0.9em; }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Traffic Generator</h1>
+            <p>Complete Setup Guide - Web Proxy TURBO Mode</p>
+        </div>
+        
+        <div class="content">
+            <div class="step">
+                <span class="step-number">1</span>
+                <h3>Install Node.js</h3>
+                <ul>
+                    <li>Download from: <strong>https://nodejs.org/</strong></li>
+                    <li>Choose <strong>LTS version</strong></li>
+                    <li>Install with default settings</li>
+                    <li>Restart your PC after installation</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>Run Setup (First Time Only)</h3>
+                <div class="file-box" onclick="alert('Double-click this file in Windows Explorer')">
+                    📦 SETUP_COMPLETE.bat
+                </div>
+                <ul>
+                    <li>Wait 5-10 minutes for installation</li>
+                    <li>Installs all dependencies automatically</li>
+                    <li>Downloads Chromium browser</li>
+                    <li>Sets up Cloudflare tunnel (optional)</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <h3>Start the Server</h3>
+                <p><strong>Choose one option:</strong></p>
+                
+                <div class="file-box" onclick="alert('For local access only')">
+                    💻 Run_Local.bat
+                </div>
+                <p style="margin-left: 50px;">Access: <strong>http://localhost:3000</strong></p>
+                
+                <p style="margin: 15px 0 5px 50px;"><strong>OR</strong></p>
+                
+                <div class="file-box" onclick="alert('For remote/public access')">
+                    🌍 Run_Public_Cloudflare.bat
+                </div>
+                <p style="margin-left: 50px;">Creates public URL: <strong>https://xxxx.trycloudflare.com</strong></p>
+            </div>
+
+            <div class="success">
+                <h3>✅ Web Proxy TURBO Mode Features</h3>
+                <div class="feature-grid">
+                    <div class="feature">
+                        <h4>15</h4>
+                        <p>Parallel Visits</p>
+                    </div>
+                    <div class="feature">
+                        <h4>3</h4>
+                        <p>Browsers</p>
+                    </div>
+                    <div class="feature">
+                        <h4>5</h4>
+                        <p>Tabs Each</p>
+                    </div>
+                    <div class="feature">
+                        <h4>FREE</h4>
+                        <p>No Proxy List!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <h3>Using the Application</h3>
+                <ul>
+                    <li>Open the URL in your browser</li>
+                    <li>Upload CSV file with Amazon ASINs</li>
+                    <li>Check <strong>"🌐 Web Proxy TURBO Mode"</strong></li>
+                    <li>Set: <strong>Browsers = 3</strong>, <strong>Tabs = 5</strong></li>
+                    <li>Uncheck <strong>"Headless Mode"</strong> to see browsers</li>
+                    <li>Click <strong>"Start Traffic"</strong></li>
+                </ul>
+            </div>
+
+            <div class="warning">
+                <h3>⚠️ Troubleshooting</h3>
+                <ul>
+                    <li><strong>"Node.js not found"</strong> → Install Node.js and restart PC</li>
+                    <li><strong>"npm install failed"</strong> → Check internet connection</li>
+                    <li><strong>Browsers not opening</strong> → Run SETUP_COMPLETE.bat again</li>
+                    <li><strong>Port 3000 in use</strong> → Close other Node.js processes</li>
+                </ul>
+            </div>
+
+            <div class="step">
+                <h3>📋 CSV File Format</h3>
+                <p style="margin: 10px 0;">Your CSV should contain Amazon ASINs (one per line):</p>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace;">
+                    B08N5WRWNW<br>
+                    B09G9FPHY6<br>
+                    B0BDJ6KGFP
+                </div>
+            </div>
+
+            <div class="success">
+                <h3>🎯 Proxy Services (Auto-Rotated)</h3>
+                <ol style="margin-left: 20px; margin-top: 10px;">
+                    <li>CroxyProxy.com</li>
+                    <li>SSLUnblocker.com</li>
+                    <li>ProxySite.com</li>
+                    <li>CroxyProxy.rocks</li>
+                    <li>BlockAway.net</li>
+                </ol>
+                <p style="margin-top: 10px;"><strong>Each tab automatically gets a different IP!</strong></p>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

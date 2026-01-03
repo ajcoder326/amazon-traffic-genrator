@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Amazon Traffic Generator</title>
+    <style>
+        body {
+            width: 400px;
+            padding: 15px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        h2 {
+            text-align: center;
+            color: #232f3e;
+            margin-top: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="file"],
+        input[type="number"],
+        select {
+            padding: 10px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input[type="number"] {
+            width: 100px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #ff9900;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #e68a00;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #status {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #555;
+            text-align: center;
+            min-height: 20px;
+        }
+
+        #progressBarContainer {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 4px;
+            height: 10px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        #progressBar {
+            width: 0%;
+            height: 100%;
+            background-color: #232f3e;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #statsContainer {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #333;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-weight: bold;
+        }
+
+        .stat-value {
+            color: #ff9900;
+        }
+
+        .config-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .config-row label {
+            margin-bottom: 0;
+            flex-shrink: 0;
+        }
+
+        .status-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>🚀 Traffic Generator</h2>
+    <div class="container">
+        <div id="domainSection">
+            <label for="domainSelect">Select Amazon Domain:</label>
+            <select id="domainSelect">
+                <option value="amazon.com">amazon.com (USA)</option>
+                <option value="amazon.in">amazon.in (India)</option>
+                <option value="amazon.co.uk">amazon.co.uk (UK)</option>
+                <option value="amazon.de">amazon.de (Germany)</option>
+                <option value="amazon.fr">amazon.fr (France)</option>
+                <option value="amazon.it">amazon.it (Italy)</option>
+                <option value="amazon.es">amazon.es (Spain)</option>
+                <option value="amazon.ca">amazon.ca (Canada)</option>
+                <option value="amazon.com.mx">amazon.com.mx (Mexico)</option>
+                <option value="amazon.com.br">amazon.com.br (Brazil)</option>
+                <option value="amazon.com.au">amazon.com.au (Australia)</option>
+                <option value="amazon.co.jp">amazon.co.jp (Japan)</option>
+            </select>
+        </div>
+
+        <div id="uploadSection">
+            <label for="csvFile">Upload CSV with ASINs:</label>
+            <input type="file" id="csvFile" accept=".csv">
+        </div>
+
+        <div id="proxySection">
+            <label for="proxyFile">Upload Proxy JSON (Optional):</label>
+            <input type="file" id="proxyFile" accept=".json">
+            <div id="proxyStatus" class="status-text">No proxies loaded</div>
+        </div>
+
+        <div class="config-row">
+            <label for="repeatCycles">Repeat Cycles:</label>
+            <input type="number" id="repeatCycles" min="1" max="100" value="1">
+        </div>
+
+        <div class="config-row">
+            <input type="checkbox" id="clearCacheToggle">
+            <label for="clearCacheToggle" style="display:inline; font-weight:normal;">Clear Cache & Cookies after each ASIN</label>
+        </div>
+
+        <div id="status">Ready</div>
+
+        <div id="controls" class="hidden">
+            <button id="startBtn">Start Traffic Generation</button>
+            <button id="stopBtn" class="hidden" style="background-color: #d00;">Stop</button>
+        </div>
+
+        <div id="progressSection" class="hidden">
+            <div id="progressBarContainer">
+                <div id="progressBar"></div>
+            </div>
+            <div id="statsContainer">
+                <div class="stat-row">
+                    <span class="stat-label">My IP:</span>
+                    <span class="stat-value" id="myIp">Checking...</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Current IP:</span>
+                    <span class="stat-value" id="currentIp">Checking...</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Current Cycle:</span>
+                    <span class="stat-value" id="currentCycle">1 of 1</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Current ASIN:</span>
+                    <span class="stat-value" id="currentAsin">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Current Action:</span>
+                    <span class="stat-value" id="currentAction">-</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Cycle Progress:</span>
+                    <span class="stat-value" id="cycleProgress">0 / 0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Total Processed:</span>
+                    <span class="stat-value" id="totalProcessed">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Time Elapsed:</span>
+                    <span class="stat-value" id="timeElapsed">0s</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">ETA:</span>
+                    <span class="stat-value" id="eta">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="popup.js"></script>
+</body>
+
+</html>

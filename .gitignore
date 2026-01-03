@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Uploads
+server/uploads/
+*.csv
+
+# Logs
+*.log
+npm-debug.log*
+
+# Cloudflare binary
+server/cloudflared.exe
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Proxy files (will be generated)
+server/proxies.json
+
+# Temporary files
+*.tmp
+*.temp

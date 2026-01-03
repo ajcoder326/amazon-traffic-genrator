@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Generator Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <header>
+            <h1>Traffic Generator <span class="badge">PRO</span></h1>
+            <div class="status-indicator" id="connectionStatus">Connected</div>
+        </header>
+
+        <main>
+            <div class="grid-layout">
+                <!-- Configuration Panel -->
+                <section class="card config-card">
+                    <h2>Configuration</h2>
+                    <form id="configForm">
+                        <div class="form-group">
+                            <label>Target Domain</label>
+                            <select id="domain" class="full-width">
+                                <option value="amazon.in">amazon.in</option>
+                                <option value="amazon.com">amazon.com</option>
+                                <option value="amazon.co.uk">amazon.co.uk</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group file-upload">
+                            <label>ASIN List (CSV)</label>
+                            <input type="file" id="csvFile" accept=".csv" hidden>
+                            <div class="upload-trigger" id="csvTrigger">
+                                <span class="icon">📄</span>
+                                <span class="text">Click to upload CSV</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group file-upload">
+                            <label>Proxy List (JSON) - 50 IPs</label>
+                            <input type="file" id="proxyFile" accept=".json" hidden>
+                            <div class="upload-trigger" id="proxyTrigger">
+                                <span class="icon">🌐</span>
+                                <span class="text">Click to upload Proxies</span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group half">
+                                <label>Cycles</label>
+                                <input type="number" id="cycles" value="1" min="1">
+                            </div>
+                            <div class="form-group half">
+                                <label>Threads</label>
+                                <input type="number" id="threads" value="1" min="1" max="50"
+                                    title="Concurrent browsers (1 for VPN mode)">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                                <input type="checkbox" id="headless" checked style="width:auto; margin:0;">
+                                Run Headless (Uncheck to see browser)
+                            </label>
+                        </div>
+
+                        <!-- Connection Mode Section -->
+                        <div class="form-group" style="background: #2d3748; padding: 12px; border-radius: 8px; margin-top: 10px;">
+                            <label style="font-size: 13px; color: #a0aec0; margin-bottom: 10px; display: block;">Connection Mode:</label>
+                            
+                            <!-- Multi-Phone Mode (NEW) -->
+                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-bottom: 8px;">
+                                <input type="checkbox" id="useMultiPhone" style="width:auto; margin:0;">
+                                <span style="color: #f687b3;">📱📱📱 Multi-Phone Mode (5 Phones)</span>
+                            </label>
+                            <div id="multiPhoneOptions" style="display:none; margin-top: 10px; margin-bottom: 15px; padding-left: 25px;">
+                                <div class="row">
+                                    <div class="form-group half">
+                                        <label style="font-size: 12px;">Rotate IP every</label>
+                                        <input type="number" id="multiPhoneRotateEvery" value="10" min="1" max="100"
+                                            title="Toggle Airplane Mode after X visits per phone">
+                                    </div>
+                                    <div class="form-group half">
+                                        <label style="font-size: 12px;">Mode</label>
+                                        <select id="multiPhoneMode" style="font-size: 11px;">
+                                            <option value="parallel">Parallel (5 browsers)</option>
+                                            <option value="roundrobin">Round-Robin</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <p id="multiPhoneStatus" style="font-size: 11px; color: #f687b3; margin: 5px 0 0 0;">
+                                    🔍 Phones detected: Scanning...
+                                </p>
+                                <p style="font-size: 11px; color: #718096; margin: 5px 0 0 0;">
+                                    📲 All phones need: USB Debugging ON + connected via USB Hub
+                                </p>
+                            </div>
+                            
+                            <!-- Mobile Mode (Single Phone) -->
+                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-bottom: 8px;">
+                                <input type="checkbox" id="useMobile" style="width:auto; margin:0;">
+                                <span style="color: #f6ad55;">📱 Single Phone (USB Tethering)</span>
+                            </label>
+                            <div id="mobileOptions" style="display:none; margin-top: 10px; margin-bottom: 15px; padding-left: 25px;">
+                                <div class="row">
+                                    <div class="form-group half">
+                                        <label style="font-size: 12px;">Rotate IP every</label>
+                                        <input type="number" id="mobileRotateEvery" value="10" min="1" max="100"
+                                            title="Toggle Airplane Mode after X visits">
+                                    </div>
+                                    <div class="form-group half">
+                                        <label style="font-size: 12px;">Phone Status</label>
+                                        <span id="mobileStatus" style="color: #a0aec0; font-size: 12px;">Not connected</span>
+                                    </div>
+                                </div>
+                                <p style="font-size: 11px; color: #718096; margin: 5px 0 0 0;">
+                                    📲 Requires: USB Debugging ON + USB Tethering ON + ADB installed
+                                </p>
+                            </div>
+                            
+                            <!-- VPN Mode -->
+                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-bottom: 8px;">
+                                <input type="checkbox" id="useVPN" style="width:auto; margin:0;">
+                                <span style="color: #48bb78;">🛡️ VPN Mode (Planet VPN) - ❌ Not Working</span>
+                            </label>
+                            <div id="vpnOptions" style="display:none; margin-top: 10px; padding-left: 25px;">
+                                <div class="row">
+                                    <div class="form-group half">
+                                        <label style="font-size: 12px;">Rotate VPN every</label>
+                                        <input type="number" id="vpnRotateEvery" value="10" min="1" max="100"
+                                            title="Change VPN server after X visits">
+                                    </div>
+                                    <div class="form-group half">
+                                        <label style="font-size: 12px;">Status</label>
+                                        <span id="vpnStatus" style="color: #a0aec0; font-size: 12px;">Not connected</span>
+                                    </div>
+                                </div>
+                                <p style="font-size: 11px; color: #e53e3e; margin: 5px 0 0 0;">
+                                    ❌ Browser extensions don't work with Playwright. Use Web Proxy instead!
+                                </p>
+                            </div>
+                            
+                            <!-- Web Proxy Mode (NEW - WORKING) -->
+                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-bottom: 8px;">
+                                <input type="checkbox" id="useWebProxy" style="width:auto; margin:0;">
+                                <span style="color: #48bb78;">🌐 Web Proxy TURBO Mode - ✅ FREE + Multi-Browser!</span>
+                            </label>
+                            <div id="webProxyOptions" style="display:none; margin-top: 10px; padding-left: 25px;">
+                                <div class="row">
+                                    <div class="form-group half">
+                                        <label style="font-size: 12px;">🖥️ Browsers</label>
+                                        <input type="number" id="webProxyBrowserCount" value="3" min="1" max="5"
+                                            title="Number of browser instances to open">
+                                    </div>
+                                    <div class="form-group half">
+                                        <label style="font-size: 12px;">📑 Tabs/Browser</label>
+                                        <input type="number" id="webProxyTabCount" value="5" min="1" max="10"
+                                            title="Number of tabs per browser">
+                                    </div>
+                                </div>
+                                <p style="font-size: 12px; color: #f6ad55; margin: 8px 0 5px 0; font-weight: bold;">
+                                    ⚡ Total: <span id="webProxyTotalCalc">15</span> parallel visits!
+                                </p>
+                                <p style="font-size: 11px; color: #48bb78; margin: 5px 0 0 0;">
+                                    ✅ Uses 5 different proxy services:
+                                </p>
+                                <p style="font-size: 10px; color: #a0aec0; margin: 3px 0 0 0;">
+                                    📌 CroxyProxy | SSLUnblocker | ProxySite | CroxyProxy.rocks | BlockAway
+                                </p>
+                                <p style="font-size: 11px; color: #63b3ed; margin: 5px 0 0 0;">
+                                    💡 3 browsers × 5 tabs = 15 different IPs hitting Amazon simultaneously!
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="actions">
+                            <button type="button" id="startBtn" class="btn primary">Start Traffic</button>
+                            <button type="button" id="stopBtn" class="btn danger hidden">Stop</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Stats Panel -->
+                <section class="card stats-card">
+                    <h2>Live Statistics</h2>
+
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="label">Total Processed</span>
+                            <span class="value" id="statProcessed">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">Active Threads</span>
+                            <span class="value" id="statThreads">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">Working Proxies</span>
+                            <span class="value" id="statProxies">0/50</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="label">Success Rate</span>
+                            <span class="value" id="statSuccess">100%</span>
+                        </div>
+                    </div>
+
+                    <div class="progress-section">
+                        <div class="progress-label">
+                            <span>Current Cycle Progress</span>
+                            <span id="progressText">0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" id="progressBar"></div>
+                        </div>
+                    </div>
+
+                    <div class="logs-container">
+                        <h3>Activity Log</h3>
+                        <div id="activityLogs" class="logs-list">
+                            <div class="log-entry system">System ready...</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
