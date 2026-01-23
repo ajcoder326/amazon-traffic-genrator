@@ -64,6 +64,14 @@ function disableOtherModes(except) {
         mobileToggle.checked = false;
         mobileOptions.style.display = 'none';
     }
+    if (except !== 'mobileturbo') {
+        const mobileTurboToggle = document.getElementById('useMobileTurbo');
+        const mobileTurboOptions = document.getElementById('mobileTurboOptions');
+        if (mobileTurboToggle) {
+            mobileTurboToggle.checked = false;
+            mobileTurboOptions.style.display = 'none';
+        }
+    }
     if (except !== 'multiphone' && multiPhoneToggle) {
         multiPhoneToggle.checked = false;
         multiPhoneOptions.style.display = 'none';
@@ -148,8 +156,77 @@ if (mobileToggle) {
             threadsInput.value = 1;
             threadsInput.disabled = true;
             addLog('📱 Single Phone Mode enabled - using USB Tethering + ADB', 'info');
+            
+            // Check phone status
+            checkPhoneStatus('mobileStatus');
         } else {
             threadsInput.disabled = false;
+        }
+    });
+}
+
+// Mobile TURBO Mode Toggle Handler
+const mobileTurboToggle = document.getElementById('useMobileTurbo');
+const mobileTurboOptions = document.getElementById('mobileTurboOptions');
+if (mobileTurboToggle) {
+    mobileTurboToggle.addEventListener('change', (e) => {
+        mobileTurboOptions.style.display = e.target.checked ? 'block' : 'none';
+        
+        if (e.target.checked) {
+            disableOtherModes('mobileturbo');
+            headlessToggle.checked = false; // Headed mode recommended
+            headlessToggle.disabled = false;
+            threadsInput.value = 1;
+            threadsInput.disabled = true;
+            updateMobileTurboTotal();
+            addLog('🚀 Mobile TURBO Mode enabled - multiple browsers via USB Tethering!', 'info');
+            
+            // Check phone status
+            checkPhoneStatus('mobileTurboStatus');
+        } else {
+            threadsInput.disabled = false;
+        }
+    });
+}
+
+// Mobile TURBO Total Calculator
+function updateMobileTurboTotal() {
+    const browserCount = parseInt(document.getElementById('mobileTurboBrowserCount')?.value || 3);
+    const tabCount = parseInt(document.getElementById('mobileTurboTabCount')?.value || 5);
+    const total = browserCount * tabCount;
+    const totalSpan = document.getElementById('mobileTurboTotalCalc');
+    if (totalSpan) {
+        totalSpan.textContent = total;
+    }
+}
+
+// Add listeners for browser/tab count changes
+document.getElementById('mobileTurboBrowserCount')?.addEventListener('input', updateMobileTurboTotal);
+document.getElementById('mobileTurboTabCount')?.addEventListener('input', updateMobileTurboTotal);
+
+// Check phone status function
+function checkPhoneStatus(statusElementId) {
+    const statusElement = document.getElementById(statusElementId);
+    if (statusElement) {
+        statusElement.textContent = 'Checking...';
+        statusElement.style.color = '#a0aec0';
+    }
+    
+    fetch('/api/phone-status').then(r => r.json()).then(data => {
+        if (statusElement) {
+            if (data.connected && data.deviceInfo) {
+                const info = data.deviceInfo;
+                statusElement.innerHTML = `✅ ${info.model} (${info.carrier}) - IP: ${info.currentIP}`;
+                statusElement.style.color = '#48bb78';
+            } else {
+                statusElement.textContent = '❌ Not connected';
+                statusElement.style.color = '#e53e3e';
+            }
+        }
+    }).catch(() => {
+        if (statusElement) {
+            statusElement.textContent = '⚠️ Check failed';
+            statusElement.style.color = '#ed8936';
         }
     });
 }
@@ -202,6 +279,7 @@ startBtn.addEventListener('click', async () => {
         // Step 2: Start Job
         const useVPN = document.getElementById('useVPN')?.checked || false;
         const useMobile = document.getElementById('useMobile')?.checked || false;
+        const useMobileTurbo = document.getElementById('useMobileTurbo')?.checked || false;
         const useMultiPhone = document.getElementById('useMultiPhone')?.checked || false;
         const useWebProxy = document.getElementById('useWebProxy')?.checked || false;
         const multiPhoneMode = document.getElementById('multiPhoneMode')?.value || 'roundrobin';
@@ -213,11 +291,15 @@ startBtn.addEventListener('click', async () => {
             headless: document.getElementById('headless').checked.toString(),
             useVPN: useVPN.toString(),
             useMobile: useMobile.toString(),
+            useMobileTurbo: useMobileTurbo.toString(),
             useMultiPhone: useMultiPhone.toString(),
             useWebProxy: useWebProxy.toString(),
             multiPhoneParallel: (multiPhoneMode === 'parallel').toString(),
             vpnRotateEvery: document.getElementById('vpnRotateEvery')?.value || '10',
             mobileRotateEvery: document.getElementById('mobileRotateEvery')?.value || '10',
+            mobileTurboRotateEvery: document.getElementById('mobileTurboRotateEvery')?.value || '10',
+            mobileTurboBrowserCount: document.getElementById('mobileTurboBrowserCount')?.value || '3',
+            mobileTurboTabCount: document.getElementById('mobileTurboTabCount')?.value || '5',
             multiPhoneRotateEvery: document.getElementById('multiPhoneRotateEvery')?.value || '10',
             webProxyRotateEvery: document.getElementById('webProxyRotateEvery')?.value || '10',
             webProxyBrowserCount: document.getElementById('webProxyBrowserCount')?.value || '3',

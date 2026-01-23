@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const jobManager = require('./src/services/jobManager');
 const multiPhoneRotator = require('./src/services/multiPhoneRotator');
+const mobileIPRotator = require('./src/services/mobileIPRotator');
 
 const app = express();
 const server = http.createServer(app);
@@ -95,6 +96,31 @@ app.get('/api/scan-phones', async (req, res) => {
         });
     } catch (error) {
         res.json({ success: false, error: error.message, devices: [] });
+    }
+});
+
+// API to check single phone status
+app.get('/api/phone-status', async (req, res) => {
+    try {
+        const mobileIPRotator = require('./src/services/mobileIPRotator');
+        const connected = await mobileIPRotator.checkConnection();
+        
+        if (connected) {
+            const deviceInfo = await mobileIPRotator.getDeviceInfo();
+            res.json({
+                success: true,
+                connected: true,
+                deviceInfo: deviceInfo
+            });
+        } else {
+            res.json({
+                success: true,
+                connected: false,
+                message: 'No phone connected'
+            });
+        }
+    } catch (error) {
+        res.json({ success: false, connected: false, error: error.message });
     }
 });
 

@@ -117,11 +117,51 @@
                                     </div>
                                     <div class="form-group half">
                                         <label style="font-size: 12px;">Phone Status</label>
-                                        <span id="mobileStatus" style="color: #a0aec0; font-size: 12px;">Not connected</span>
+                                        <span id="mobileStatus" style="color: #a0aec0; font-size: 12px;">Checking...</span>
                                     </div>
                                 </div>
                                 <p style="font-size: 11px; color: #718096; margin: 5px 0 0 0;">
                                     📲 Requires: USB Debugging ON + USB Tethering ON + ADB installed
+                                </p>
+                            </div>
+
+                            <!-- Mobile TURBO Mode (NEW - PARALLEL) -->
+                            <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin-bottom: 8px;">
+                                <input type="checkbox" id="useMobileTurbo" style="width:auto; margin:0;">
+                                <span style="color: #48bb78;">🚀 Mobile TURBO Mode - ✅ Multi-Browser!</span>
+                            </label>
+                            <div id="mobileTurboOptions" style="display:none; margin-top: 10px; margin-bottom: 15px; padding-left: 25px;">
+                                <div class="row">
+                                    <div class="form-group half">
+                                        <label style="font-size: 12px;">🖥️ Browsers</label>
+                                        <input type="number" id="mobileTurboBrowserCount" value="3" min="1" max="5"
+                                            title="Number of browser instances to open">
+                                    </div>
+                                    <div class="form-group half">
+                                        <label style="font-size: 12px;">📑 Tabs/Browser</label>
+                                        <input type="number" id="mobileTurboTabCount" value="5" min="1" max="10"
+                                            title="Number of tabs per browser">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group half">
+                                        <label style="font-size: 12px;">Rotate IP every</label>
+                                        <input type="number" id="mobileTurboRotateEvery" value="10" min="1" max="100"
+                                            title="Toggle Airplane Mode after X visits">
+                                    </div>
+                                    <div class="form-group half">
+                                        <label style="font-size: 12px;">Phone Status</label>
+                                        <span id="mobileTurboStatus" style="color: #a0aec0; font-size: 12px;">Checking...</span>
+                                    </div>
+                                </div>
+                                <p style="font-size: 12px; color: #f6ad55; margin: 8px 0 5px 0; font-weight: bold;">
+                                    ⚡ Total: <span id="mobileTurboTotalCalc">15</span> parallel visits via mobile IP!
+                                </p>
+                                <p style="font-size: 11px; color: #718096; margin: 5px 0 0 0;">
+                                    📲 Requires: USB Debugging ON + USB Tethering ON + ADB installed
+                                </p>
+                                <p style="font-size: 11px; color: #63b3ed; margin: 5px 0 0 0;">
+                                    💡 All browsers share same mobile IP but visit 15x faster!
                                 </p>
                             </div>
                             

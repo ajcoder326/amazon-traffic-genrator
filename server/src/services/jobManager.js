@@ -4,6 +4,7 @@ const proxyManager = require('./proxyManager');
 const browserService = require('./browser_playwright');
 const browserVPNService = require('./browser_vpn');
 const browserMobileService = require('./browser_mobile');
+const browserMobileTurboService = require('./browser_mobile_turbo');
 const multiPhoneBrowserService = require('./browser_multiphone');
 const browserWebProxyService = require('./browser_webproxy');
 
@@ -41,6 +42,7 @@ class JobManager {
             // Check connection mode
             this.useVPN = settings.useVPN === 'true' || settings.useVPN === true;
             this.useMobile = settings.useMobile === 'true' || settings.useMobile === true;
+            this.useMobileTurbo = settings.useMobileTurbo === 'true' || settings.useMobileTurbo === true;
             this.useMultiPhone = settings.useMultiPhone === 'true' || settings.useMultiPhone === true;
             this.useWebProxy = settings.useWebProxy === 'true' || settings.useWebProxy === true;
             this.webProxyBrowserCount = parseInt(settings.webProxyBrowserCount) || 3; // Multi-browser support
@@ -58,6 +60,21 @@ class JobManager {
                 }
                 browserWebProxyService.setBrowserCount(this.webProxyBrowserCount);
                 browserWebProxyService.setTabCount(this.webProxyTabCount);
+            } else if (this.useMobileTurbo) {
+                const mobileBrowserCount = parseInt(settings.mobileTurboBrowserCount) || 3;
+                const mobileTabCount = parseInt(settings.mobileTurboTabCount) || 5;
+                const totalParallel = mobileBrowserCount * mobileTabCount;
+                console.log(`[JobManager] 🚀 Mobile TURBO Mode: ${mobileBrowserCount} browsers × ${mobileTabCount} tabs = ${totalParallel} parallel visits via USB Tethering!`);
+                this.activeBrowserService = browserMobileTurboService;
+                
+                // Set rotation frequency if provided
+                if (settings.mobileTurboRotateEvery) {
+                    browserMobileTurboService.setRotateEvery(parseInt(settings.mobileTurboRotateEvery) || 10);
+                }
+                browserMobileTurboService.setBrowserCount(mobileBrowserCount);
+                browserMobileTurboService.setTabCount(mobileTabCount);
+                this.mobileTurboBrowserCount = mobileBrowserCount;
+                this.mobileTurboTabCount = mobileTabCount;
             } else if (this.useMultiPhone) {
                 console.log('[JobManager] Using Multi-Phone Mode');
                 this.activeBrowserService = multiPhoneBrowserService;
@@ -122,9 +139,15 @@ class JobManager {
             console.log(`Job started with ${urls.length} ASINs, ${cycles} cycles.`);
             this.broadcastStatus(`Job started with ${urls.length} ASINs, ${cycles} cycles.${this.useVPN ? ' (VPN Mode)' : ''}`, 'running');
 
-            // Initialize Browser (VPN or regular)
+            // Initialize Browser service
             const headless = this.settings.headless !== 'false';
-            await this.activeBrowserService.initBrowser(headless);
+            
+            // Mobile TURBO and Web Proxy TURBO use initBrowsers (plural)
+            if (this.useMobileTurbo || this.useWebProxy) {
+                await this.activeBrowserService.initBrowsers(headless);
+            } else {
+                await this.activeBrowserService.initBrowser(headless);
+            }
 
             this.processQueue();
 
@@ -144,7 +167,12 @@ class JobManager {
         // Close browser after short delay to allow pending to finish or force close
         setTimeout(async () => {
             if (this.activeBrowserService) {
-                await this.activeBrowserService.closeBrowser();
+                // Mobile TURBO and Web Proxy TURBO use closeBrowsers (plural)
+                if (this.useMobileTurbo || this.useWebProxy) {
+                    await this.activeBrowserService.closeBrowsers();
+                } else {
+                    await this.activeBrowserService.closeBrowser();
+                }
             }
         }, 1000);
     }
@@ -170,6 +198,12 @@ class JobManager {
         // SPECIAL: Web Proxy Multi-Tab Mode - process in batches
         if (this.useWebProxy && this.webProxyTabCount > 1) {
             await this.processWebProxyBatch();
+            return;
+        }
+
+        // SPECIAL: Mobile TURBO Mode - process in batches like Web Proxy
+        if (this.useMobileTurbo && this.mobileTurboTabCount > 1) {
+            await this.processMobileTurboBatch();
             return;
         }
 
@@ -280,6 +314,88 @@ class JobManager {
         this.broadcastStatus('All cycles completed!', 'stopped');
         if (this.activeBrowserService) {
             this.activeBrowserService.closeBrowser();
+        }
+    }
+
+    /**
+     * Process URLs in batches using multiple browsers + tabs (Mobile TURBO mode)
+     * Same as Web Proxy TURBO but uses single phone's mobile IP via USB tethering
+     */
+    async processMobileTurboBatch() {
+        const browserCount = this.mobileTurboBrowserCount;
+        const tabCount = this.mobileTurboTabCount;
+        const batchSize = browserCount * tabCount; // Total parallel capacity
+        
+        console.log(`[JobManager] 🚀 Mobile TURBO: Using ${browserCount} browsers × ${tabCount} tabs = ${batchSize} parallel visits via phone!`);
+        
+        while (this.isRunning && this.jobQueue.length > 0) {
+            // Get batch of URLs (browserCount × tabCount)
+            const batch = [];
+            for (let i = 0; i < batchSize && this.jobQueue.length > 0; i++) {
+                batch.push(this.jobQueue.shift());
+            }
+            
+            if (batch.length === 0) break;
+            
+            this.activeThreads = batch.length;
+            const mobileStatus = browserMobileTurboService.getStatus();
+            this.broadcastProgress({
+                activeThreads: batch.length,
+                log: `🚀 Mobile TURBO: Opening ${batch.length} tabs (IP: ${mobileStatus.currentIP || 'checking...'})...`
+            });
+            
+            // Process each URL in parallel using different browser/tab slots
+            const promises = [];
+            for (let i = 0; i < batch.length; i++) {
+                const slot = browserMobileTurboService.getNextSlot();
+                const url = batch[i].url;
+                
+                promises.push(
+                    browserMobileTurboService.runVisit(url, slot.browserIndex, slot.tabIndex)
+                        .then(result => ({ ...result, url, index: i }))
+                        .catch(error => ({ success: false, error: error.message, url, index: i }))
+                );
+            }
+            
+            const results = await Promise.all(promises);
+            
+            // Process results
+            for (const result of results) {
+                this.totalProcessed++;
+                
+                if (result.success) {
+                    this.broadcastProgress({ 
+                        log: `✓ Tab ${result.index + 1}: ${result.url} visited via mobile IP` 
+                    });
+                } else {
+                    this.broadcastProgress({ 
+                        log: `✗ Tab ${result.index + 1}: ${result.url} - ${result.error}` 
+                    });
+                }
+            }
+            
+            this.activeThreads = 0;
+            this.broadcastProgress({
+                processed: this.totalProcessed,
+                activeThreads: 0
+            });
+            
+            // Small delay between batches
+            if (this.jobQueue.length > 0) {
+                this.broadcastProgress({ log: `⏳ Waiting 2s before next batch...` });
+                await new Promise(r => setTimeout(r, 2000));
+            }
+        }
+        
+        // Job complete
+        this.isRunning = false;
+        this.broadcastProgress({
+            processed: this.totalProcessed,
+            activeThreads: 0
+        });
+        this.broadcastStatus('All cycles completed!', 'stopped');
+        if (this.activeBrowserService) {
+            this.activeBrowserService.closeBrowsers();
         }
     }
 
